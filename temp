@@ -1,0 +1,313 @@
+# from tkinter import *
+# from tkinter.ttk import *
+# import tkinter as tk
+# from tkinter import ttk, messagebox
+# import requests
+# from tkinter import scrolledtext
+# from serial import Serial, SerialException
+# import serial.tools.list_ports
+# import threading
+# from tkinter import PhotoImage
+# import time_and_date #time and date GUI file
+# from PIL import Image, ImageTk
+# from pathlib import Path #needs approval
+# from datetime import datetime
+
+# #test commit change
+ 
+# # Function to fetch weather data from the server
+# def fetch_weather_data():
+#     url = "https://tp-weather.uqcloud.net/weather.json"
+#     try:
+#         response = requests.get(url)
+#         response.raise_for_status()
+#         data = response.json()
+#         return data['weather']
+#     except requests.exceptions.RequestException as e:
+#         messagebox.showerror("Error", f"Failed to fetch weather data: {e}")
+#         return None
+
+
+# #Ensure weather starts from today
+# def normalise_date(date_str):
+#     # Ensure the date is in the format YYYY-MM-DD
+#     parts = date_str.split('-')
+#     if len(parts) == 3:
+#         year, month, day = parts
+#         month = month.zfill(2)  # Add leading zero if needed
+#         day = day.zfill(2)      # Add leading zero if needed
+#         return f"{year}-{month}-{day}"
+#     return date_str
+
+# def show_weather():
+#     weather = fetch_weather_data()
+
+#     if weather:
+#         # Get today's date and normalise it
+#         today_date = datetime.now().strftime('%Y-%m-%d')
+
+#         # Create a new window for displaying the weather
+#         newWindow = tk.Toplevel(root)
+#         newWindow.title("Weather Forecast")
+#         newWindow.geometry("700x600")
+
+#         weatherframe = tk.Frame(newWindow)
+#         weatherframe.pack(pady=20)
+
+#         # Initialise flag to start displaying from today's date
+#         display_date = False
+#         i = 0
+        
+#         for date, info in weather.items():
+#             normalised_date = normalise_date(date)
+
+#             # Start displaying weather from today's date
+#             if not display_date:
+#                 if normalised_date >= today_date:
+#                     display_date = True
+            
+#             if display_date:
+#                 if i >= 7:
+#                     break
+#                 date_label = tk.Label(weatherframe, text=normalised_date, font=("Comic Sans", 14, "bold"))
+#                 date_label.grid(row=i, column=0, padx=10, pady=5, sticky="w")
+
+#                 temp_label = tk.Label(weatherframe, text=f"Temperature: {info['temperature']} °C", font=("Comic Sans", 14))
+#                 temp_label.grid(row=i, column=1, padx=10, pady=5, sticky="w")
+
+#                 humidity_label = tk.Label(weatherframe, text=f"Humidity: {info['humidity']} %", font=("Comic Sans", 14))
+#                 humidity_label.grid(row=i, column=2, padx=10, pady=5, sticky="w")
+
+#                 forecast_label = tk.Label(weatherframe, text=f"Forecast: {info['forecast']}", font=("Comic Sans", 14))
+#                 forecast_label.grid(row=i, column=3, padx=10, pady=5, sticky="w")
+
+#                 i += 1
+#     else:
+#         messagebox.showerror("Error", "Weather data could not be retrieved.")
+
+
+# def show_ports():
+#     ports = list(serial.tools.list_ports.comports())
+#     port_options = [p.device for p in ports]
+#     port_combobox['values'] = port_options
+#     if port_options:
+#         port_combobox.current(0)
+#     else:
+#         port_combobox.set('No ports available')
+
+# def refresh_ports():
+#     show_ports()
+#     root.after(5000, refresh_ports)  # Refresh every 5 seconds
+
+# def connect_port():
+#     selected_port = port_combobox.get()
+#     if selected_port and selected_port != 'No ports available':
+#         try:
+#             global ser
+#             ser = Serial(selected_port, baudRate, timeout=1)
+
+#             if ser.is_open:
+#                 messagebox.showinfo("Success", f"Connected to {selected_port}")
+#                 start_serial_polling()
+#             else:
+#                 messagebox.showerror("Error", f"Failed to open {selected_port}")
+#         except SerialException as e:
+#             messagebox.showerror("Error", f"Failed to connect to {selected_port}: {e}")
+#     else:
+#         messagebox.showwarning("Warning", "Please select a valid port from the dropdown.")
+
+# def start_serial_polling():
+#     root.after(100, poll_serial)  # Start polling every 100 milliseconds
+
+# def poll_serial():
+#     if ser and ser.is_open:
+#         try:
+#             if ser.in_waiting > 0:
+#                 received_data = ser.read().decode('ascii').strip()
+#                 update_text_area(received_data)
+#         except SerialException as e:
+#             print(f"Serial error: {e}")
+#             ser.close()
+#     root.after(100, poll_serial)  # Continue polling
+
+# # Function to receive and display data from AVR
+# def read_serial():
+#     while True:
+#         try:
+#             if ser.in_waiting > 0:
+#                 received_data = ser.read().decode('ascii').strip()
+#                 # Safely update the GUI using root.after
+#                 root.after(0, update_text_area, received_data)
+#         except SerialException as e:
+#             print(f"Serial error: {e}")
+#             break
+
+
+# def update_text_area(received_data):
+#     text_area.insert(tk.END, f"Received: {received_data}\n")
+#     text_area.see(tk.END)
+
+# def send_data():
+#     if 'ser' not in globals() or ser is None:
+#         messagebox.showerror("Error", "No serial connection established!")
+#         return
+#     try:
+#         data = entry.get()
+#         ser.write(data.encode('ascii'))
+#         text_area.insert(tk.END, f"Sent: {data}\n")
+#         text_area.see(tk.END)
+#         entry.delete(0, tk.END)
+#     except SerialException as e:
+#         messagebox.showerror("Error", f"Failed to send data: {e}")
+
+# def update_time():
+#     current_time = time.strftime('%Y-%m-%d %H:%M:%S')
+#     time_label.config(text=f"Current Time: {current_time}")
+#     root.after(1000, update_time)
+
+
+# root = tk.Tk()
+# root.title("Demo 1 GUI")
+# root.geometry("800x800")
+# root.configure(bg='darkgrey')
+
+# # Alarms and settings in a row
+# top_frame = Frame(root)
+# top_frame.pack(pady=10)
+
+# # Alarms
+# alarm_label = Label(top_frame, text="Alarms:", width=10)
+# alarm_label.grid(row=0, column=0, padx=5, pady=5)
+
+# var = StringVar(root, "1")
+ 
+# # Dictionary to create multiple buttons 
+# values = {"Alarm 1" : "1",
+#           "Alarm 2" : "2",}
+
+# for (text, value) in values.items():
+#     alarm_radiobutton = Radiobutton(alarm_label, text = text, variable = var, 
+#                                     value = value)
+#     alarm_radiobutton.pack(side=LEFT, padx=5, pady = 5)
+
+
+# #Alarm setting 
+# asetting_frame = Frame(root)
+# asetting_frame.pack(side=LEFT)
+
+# asetting_label = Label(asetting_frame, text="Alarm Settings", width=6)
+# asetting_label.pack(side=TOP, padx=5, pady=5)
+
+# check_message_button = IntVar() 
+# check_notification_button = IntVar() 
+# check_LED_button = IntVar() 
+# check_buzzer_button = IntVar()
+
+# message_button = Checkbutton(top_frame, text="Display message", variable=check_message_button, onvalue=1, offvalue=0)
+# message_button.grid(row=1, column=1, padx=5, pady=5)
+
+# notification_button = Checkbutton(top_frame, text="Display notification", variable=check_notification_button, onvalue=1, offvalue=0)
+# notification_button.grid(row=1, column=2, padx=5, pady=5)
+
+# LED_button = Checkbutton(top_frame, text="LED", variable=check_LED_button, onvalue=1, offvalue=0)
+# LED_button.grid(row=1, column=3, padx=5, pady=5)
+
+# buzzer_button = Checkbutton(top_frame, text="Buzzer", variable=check_buzzer_button, onvalue=1, offvalue=0)
+# buzzer_button.grid(row=1, column=4, padx=5, pady=5)
+
+# # Display current time
+# # time_label = tk.Label(root, text="", font=("Helvetica", 14), bg='lightblue')
+# # time_label.place(relx=0.5, rely=0.2, anchor=CENTER)
+# # update_time()
+
+# # Download and display the weather data
+# weather_button = tk.Button(root, text="Download and Show Weather", command=show_weather, font=("Helvetica", 14))
+# weather_button.pack(pady=10)
+
+# # Ports section
+# ports_title = tk.Label(root, text="Available Serial Ports:", font=("Helvetica", 14, "bold"))
+# ports_title.pack(pady=10)
+
+# # Dropdown menu to display the available serial ports
+# port_combobox = ttk.Combobox(root, width=50)
+# port_combobox.pack(pady=10)
+
+# # Button to connect to the selected port
+# connect_button = tk.Button(root, text="Connect to Selected Port", command=connect_port, font=("Helvetica", 14))
+# connect_button.pack(pady=10)
+
+# # Text area to display sent and received data
+# text_area = scrolledtext.ScrolledText(root, width=80, height=10)
+# text_area.pack(pady=10)
+
+# # Entry for the demo one type uncapitalised letter
+# entry = tk.Entry(root, width=50)
+# entry.pack(side=tk.LEFT, padx=20, pady=10)
+
+# # Button to send data
+# send_button = tk.Button(root, text="Send", command=send_data)
+# send_button.pack(side=tk.RIGHT, padx=20, pady=10)
+
+# optical_button = tk.Button(root, text="Start Optical Link", font=("Helvetica", 14))
+# optical_button.place(relx=0.4, rely=0.85, anchor=CENTER)
+
+# time_date_button = tk.Button(root, text="Set Time and Date", font=("Helvetica", 14))
+# time_date_button.place(relx=0.6, rely=0.85, anchor=CENTER)
+
+
+# # Serial port setup
+# baudRate = 9600
+
+# show_ports()
+
+
+# #time and date GUI (opens in a new window, might have to drag the other window out of the way to see it)
+# time_date_window = tk.Tk()
+# time_date_window.title("Set time and date")
+# time_date_window.geometry("400x400")  # width x height
+
+# time_and_date.configure_time_date(time_date_window)
+
+
+# #connection icon
+# connection_frame = tk.Frame(time_date_window)
+# connection_frame.pack()
+
+# # Load the image
+# try:
+#     image = Image.open(Path("images/connected_icon.png").resolve())
+# except tk.TclError as e:
+#     #print(f"Error loading image: {e}")
+#     image = None
+
+# # Create a label to display the image if it was successfully loaded
+# if image:
+#     resize_image = image.resize((20, 20))
+#     img = ImageTk.PhotoImage(resize_image)
+#     image_label = tk.Label(root, image=img)
+#     image_label.image = img  # Store a reference to the image to prevent garbage collection
+#     image_label.pack()
+
+# #Celcius Fareheit radio buttons
+# cf_frame = tk.Frame(root, padx=10, pady=10)
+# cf_frame.pack()
+
+# c_f = tk.StringVar(cf_frame) #linking variable
+
+# #celsius radio button
+# celsius = tk.Radiobutton(cf_frame, text="Celsius", variable=c_f)
+# celsius.grid(column=1, row=1)
+
+# #farenheit radio button
+# farenheit = tk.Radiobutton(cf_frame, text="Farenheit", variable=c_f)
+# farenheit.grid(column=2, row=1)
+
+# #submit button
+# #submit button
+# submit = tk.Button(cf_frame, text="Submit")
+# submit.grid(column=3, row=2)
+
+# root.mainloop()
+
+# refresh_ports()  # Initial call to populate ports
+# update_time()    # Start updating the time
